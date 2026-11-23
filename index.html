@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monetag Reward System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at top right, #1e2a4a 0%, #0d1326 50%, #05070e 100%);
+            overflow: hidden;
+        }
+
+        .moon {
+            position: absolute;
+            top: 8%;
+            right: 10%;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fffdf0 0%, #fceea7 60%, #e6c86e 100%);
+            box-shadow: 
+                0 0 30px rgba(255, 250, 210, 0.8),
+                0 0 70px rgba(255, 240, 180, 0.4),
+                0 0 120px rgba(255, 230, 150, 0.2);
+            z-index: 1;
+            animation: moonGlow 4s infinite alternate ease-in-out;
+        }
+
+        .moon::before {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: 25px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(210, 185, 110, 0.25);
+            box-shadow: 
+                35px 15px 0 -4px rgba(210, 185, 110, 0.2),
+                15px 45px 0 2px rgba(210, 185, 110, 0.22);
+        }
+
+        @keyframes moonGlow {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 250, 210, 0.7), 0 0 70px rgba(255, 240, 180, 0.3); }
+            100% { transform: scale(1.03); box-shadow: 0 0 40px rgba(255, 250, 210, 0.9), 0 0 90px rgba(255, 240, 180, 0.5); }
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .firefly {
+            position: absolute;
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            background: var(--core-color);
+            box-shadow: 
+                0 0 8px var(--glow-color),
+                0 0 18px var(--glow-color),
+                0 0 28px var(--glow-color);
+            z-index: 2;
+            pointer-events: none;
+            animation: 
+                fireflyMove var(--move-duration) infinite alternate ease-in-out,
+                fireflyBlink var(--blink-duration) infinite ease-in-out;
+        }
+
+        @keyframes fireflyMove {
+            0% { transform: translate(0px, 0px); }
+            25% { transform: translate(35px, -45px); }
+            50% { transform: translate(75px, 15px); }
+            75% { transform: translate(25px, 50px); }
+            100% { transform: translate(-20px, -15px); }
+        }
+
+        @keyframes fireflyBlink {
+            0%, 100% { opacity: 0.15; transform: scale(0.7); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        .heart {
+            position: absolute;
+            width: var(--heart-size);
+            height: var(--heart-size);
+            background: var(--heart-color);
+            transform: rotate(-45deg);
+            filter: drop-shadow(0 0 8px var(--heart-glow));
+            z-index: 2;
+            pointer-events: none;
+            animation: heartFloat var(--float-duration) infinite linear;
+            opacity: 0;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: var(--heart-size);
+            height: var(--heart-size);
+            background: var(--heart-color);
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: calc(var(--heart-size) * -0.5);
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: calc(var(--heart-size) * 0.5);
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translateY(15vh) translateX(0px) rotate(-45deg) scale(0.7);
+                opacity: 0;
+            }
+            20% { opacity: 0.85; }
+            50% {
+                transform: translateY(-35vh) translateX(25px) rotate(-35deg) scale(1);
+                opacity: 0.9;
+            }
+            80% { opacity: 0.6; }
+            100% {
+                transform: translateY(-85vh) translateX(-15px) rotate(-50deg) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* နွယ်အဆက်လေးများပုံစံ အဝါနှင့် ပန်းရောင် ဘောင်ဒီဇိုင်း */
+        .card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            padding: 30px 20px;
+            border-radius: 22px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 214, 10, 0.25);
+            border: 3px dashed #ffd60a;
+            z-index: 10;
+        }
+
+        /* အတွင်းဘက်/ဘေးပတ်လည် နွယ်ဆက် ပန်းရောင်အလှဆင်ဘောင် */
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: -7px;
+            border-radius: 27px;
+            border: 2px dotted #ff5ca8;
+            pointer-events: none;
+        }
+
+        /* လိမ္မော်ရောင် ဘောင်ခတ်ထားသော Counter */
+        .counter-text {
+            display: inline-block;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff7b00;
+            border: 2.5px solid #ff7b00;
+            background: rgba(255, 123, 0, 0.08);
+            padding: 6px 18px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 0 10px rgba(255, 123, 0, 0.2);
+        }
+
+        /* အနီရောင် စာသား */
+        .info-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #d90429;
+            margin-bottom: 22px;
+        }
+
+        /* အစိမ်းရောင်ဖျော့ ခလုတ် နှင့် ခရမ်းရောင် စာသား */
+        .btn {
+            background: linear-gradient(135deg, #a8e6cf, #7fd8be);
+            color: #6a0dad;
+            font-weight: bold;
+            border: 2px solid #52b788;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(127, 216, 190, 0.5);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            color: #666;
+            border-color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        /* ကြော်ငြာစုစုပေါင်းကြည့်ရန် ခလုတ် */
+        .total-btn {
+            margin-top: 12px;
+            background: linear-gradient(135deg, #ffd6a5, #ffadad);
+            color: #590d22;
+            border: 2px solid #ff758f;
+            padding: 10px 18px;
+            font-size: 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(255, 117, 143, 0.35);
+        }
+
+        /* စုစုပေါင်းအမှတ် ပြသမည့် Modal */
+        #totalModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #fff;
+            color: #222;
+            width: 100%;
+            max-width: 320px;
+            border-radius: 20px;
+            padding: 24px 20px;
+            text-align: center;
+            border: 3px solid #ff7b00;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #6a0dad;
+            margin-bottom: 12px;
+        }
+
+        .total-score-box {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d90429;
+            background: rgba(255, 123, 0, 0.1);
+            border: 2px dashed #ff7b00;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 18px;
+        }
+
+        .close-btn {
+            background: linear-gradient(135deg, #a8e6cf, #7fd8be);
+            color: #6a0dad;
+            font-weight: bold;
+            border: 2px solid #52b788;
+            padding: 9px 22px;
+            font-size: 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 999;
+            font-size: 20px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #7fd8be;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="moon"></div>
+    <div id="sky-container"></div>
+
+    <div class="card">
+        <div class="counter-text" id="counterDisplay">0 / 10000</div>
+        <div class="info-text">ကြော်ငြာတစ်ခုကြည့်လျှင် ၁ မှတ် တိုးပါမည်</div>
+        <button class="btn" id="watchBtn" onclick="startAdTimer()">ကြော်ငြာကြည့်မည်</button>
+        <button class="btn total-btn" id="totalBtn" onclick="showTotalPoints()">ကြော်ငြာစုစုပေါင်းကြည့်ရန်</button>
+    </div>
+
+    <!-- စုစုပေါင်းကြည့်ခဲ့သည့် ကြော်ငြာအမှတ် ပြသမည့် Pop-up -->
+    <div id="totalModal" onclick="closeTotalModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-title">ကြည့်ခဲ့သည့် ကြော်ငြာအမှတ် စုစုပေါင်း</div>
+            <div class="total-score-box" id="totalScoreDisplay">0 မှတ်</div>
+            <button class="close-btn" onclick="closeTotalModal()">ပိတ်မည်</button>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>ကြော်ငြာကြည့်ရှုနေပါသည်... <span id="countdown">5</span> စက္ကန့်</p>
+    </div>
+
+    <script>
+        function createSkyElements() {
+            const container = document.getElementById('sky-container');
+            
+            // ၁။ ကြယ်ပွင့်များ
+            const starCount = 75;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 2.5 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                
+                const duration = Math.random() * 3 + 2;
+                star.style.setProperty('--duration', `${duration}s`);
+                
+                container.appendChild(star);
+            }
+
+            // ၂။ ပိုးစွန်းကြူးလေးများ
+            const fireflyCount = 18;
+            const fireflyColors = [
+                { core: '#fff9a6', glow: '#d4ff00' },
+                { core: '#ffe680', glow: '#ffbb00' },
+                { core: '#b3ffcc', glow: '#00ff88' }
+            ];
+
+            for (let i = 0; i < fireflyCount; i++) {
+                const firefly = document.createElement('div');
+                firefly.classList.add('firefly');
+
+                firefly.style.top = `${Math.random() * 90 + 5}%`;
+                firefly.style.left = `${Math.random() * 90 + 5}%`;
+
+                const size = (Math.random() * 4 + 4).toFixed(1);
+                firefly.style.setProperty('--size', `${size}px`);
+
+                const moveDuration = (Math.random() * 6 + 6).toFixed(1);
+                const blinkDuration = (Math.random() * 2.5 + 1.5).toFixed(1);
+                firefly.style.setProperty('--move-duration', `${moveDuration}s`);
+                firefly.style.setProperty('--blink-duration', `${blinkDuration}s`);
+                firefly.style.animationDelay = `${(Math.random() * 4).toFixed(1)}s`;
+
+                const colorSet = fireflyColors[Math.floor(Math.random() * fireflyColors.length)];
+                firefly.style.setProperty('--core-color', colorSet.core);
+                firefly.style.setProperty('--glow-color', colorSet.glow);
+
+                container.appendChild(firefly);
+            }
+
+            // ၃။ အသည်းပုံလေးများ
+            const heartCount = 14;
+            const heartColors = [
+                { color: 'rgba(255, 105, 180, 0.85)', glow: '#ff1493' },
+                { color: 'rgba(255, 77, 109, 0.85)', glow: '#ff004c' },
+                { color: 'rgba(255, 182, 193, 0.85)', glow: '#ff85a2' }
+            ];
+
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+
+                heart.style.top = `${Math.random() * 40 + 55}%`;
+                heart.style.left = `${Math.random() * 90 + 5}%`;
+
+                const heartSize = (Math.random() * 8 + 10).toFixed(1);
+                heart.style.setProperty('--heart-size', `${heartSize}px`);
+
+                const floatDuration = (Math.random() * 6 + 7).toFixed(1);
+                heart.style.setProperty('--float-duration', `${floatDuration}s`);
+                heart.style.animationDelay = `${(Math.random() * 7).toFixed(1)}s`;
+
+                const hColor = heartColors[Math.floor(Math.random() * heartColors.length)];
+                heart.style.setProperty('--heart-color', hColor.color);
+                heart.style.setProperty('--heart-glow', hColor.glow);
+
+                container.appendChild(heart);
+            }
+        }
+
+        const MAX_LIMIT = 10000;
+        let count = 0;
+        let totalCount = 0;
+        let isTimerRunning = false;
+        const MONETAG_URL = 'https://uplcm.com/4/12320063';
+
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastSavedDate = localStorage.getItem('last_saved_date');
+
+            if (lastSavedDate !== today) {
+                localStorage.setItem('last_saved_date', today);
+                localStorage.setItem('ad_count', 0);
+            }
+            
+            count = parseInt(localStorage.getItem('ad_count')) || 0;
+            totalCount = parseInt(localStorage.getItem('total_ad_count')) || 0;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const watchBtn = document.getElementById('watchBtn');
+            document.getElementById('counterDisplay').innerText = `${count} / ${MAX_LIMIT}`;
+
+            if (count >= MAX_LIMIT) {
+                watchBtn.innerText = 'ယနေ့အတွက် ပြီးဆုံးပါပြီ';
+                watchBtn.disabled = true;
+            } else {
+                watchBtn.innerText = 'ကြော်ငြာကြည့်မည်';
+                watchBtn.disabled = isTimerRunning;
+            }
+        }
+
+        function showTotalPoints() {
+            const latestTotal = parseInt(localStorage.getItem('total_ad_count')) || totalCount || 0;
+            document.getElementById('totalScoreDisplay').innerText = `${latestTotal} မှတ်`;
+            document.getElementById('totalModal').style.display = 'flex';
+        }
+
+        function closeTotalModal() {
+            document.getElementById('totalModal').style.display = 'none';
+        }
+
+        function startAdTimer() {
+            if (count >= MAX_LIMIT || isTimerRunning) return;
+
+            isTimerRunning = true;
+            updateDisplay();
+
+            window.open(MONETAG_URL, '_blank');
+
+            const loader = document.getElementById('loader');
+            const countdownSpan = document.getElementById('countdown');
+            let timeLeft = 5;
+
+            loader.style.display = 'flex';
+            countdownSpan.innerText = timeLeft;
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                countdownSpan.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    loader.style.display = 'none';
+                    isTimerRunning = false;
+
+                    count++;
+                    totalCount++;
+
+                    localStorage.setItem('ad_count', count);
+                    localStorage.setItem('total_ad_count', totalCount);
+                    localStorage.setItem('last_saved_date', new Date().toDateString());
+
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            createSkyElements();
+            checkDailyReset();
+        };
+    </script>
+</body>
+</html>
